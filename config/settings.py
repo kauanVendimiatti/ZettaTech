@@ -9,14 +9,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- CONFIGURAÇÕES DE PRODUÇÃO ---
 
 # SECRET_KEY é lida de uma variável de ambiente para segurança.
-# Você irá configurar esta variável na sua plataforma de hospedagem.
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # DEBUG é False em produção, a menos que uma variável de ambiente 'DEBUG' seja 'true'.
 DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
 # Configura o ALLOWED_HOSTS para aceitar o domínio do Render automaticamente.
-# Os domínios locais são mantidos para facilitar o desenvolvimento.
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -70,20 +68,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# --- BANCO DE DADOS DE PRODUÇÃO ---
-# Configurado para usar a URL do banco de dados fornecida pela plataforma de hospedagem.
-# O banco de dados local (sqlite3) só será usado se a variável DATABASE_URL não for encontrada.
-DATABASES = {
-    'default': dj_database_url.config(
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-        conn_max_age=600,
-        ssl_require=not DEBUG # Ativa SSL para o banco de dados em produção
-    )
-}
+# --- BANCO DE DADOS ---
+# Configuração robusta que separa os ambientes de desenvolvimento e produção.
+if 'DATABASE_URL' in os.environ:
+    # Ambiente de Produção (configurado pelo Render)
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True
+        )
+    }
+else:
+    # Ambiente de Desenvolvimento (local)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
-# ... (Esta seção permanece a mesma)
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
