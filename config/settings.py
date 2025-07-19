@@ -109,10 +109,8 @@ USE_TZ = True
 
 # --- ARQUIVOS ESTÁTICOS EM PRODUÇÃO ---
 STATIC_URL = 'static/'
-# Se não estiver em modo DEBUG (ou seja, em produção), configure o Whitenoise.
-if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Default primary key field type
