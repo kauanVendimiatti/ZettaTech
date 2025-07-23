@@ -25,49 +25,54 @@ class Imovel(models.Model):
         ('Em Manutenção', 'Em Manutenção'),
         ('Inativo', 'Inativo'),
     ]
-    TIPO_GARANTIA_CHOICES = [
-        ('Caução', 'Caução'),
-        ('Fiador', 'Fiador'),
-        ('Seguro Fiança', 'Seguro Fiança'),
-        ('Título de Capitalização', 'Título de Capitalização'),
-        ('Sem Garantia', 'Sem Garantia'),
-    ]
 
-    # --- Campos do Modelo ---
-    # O ID_imovel (chave primária) é criado automaticamente pelo Django como 'id'.
+    # --- Campos do Modelo (ATUALIZADOS) ---
+    # Dados Principais
     tipo_imovel = models.CharField(max_length=50, choices=TIPO_IMOVEL_CHOICES, verbose_name="Tipo de Imóvel")
     endereco = models.CharField(max_length=255, verbose_name="Endereço Completo")
     descricao = models.TextField(blank=True, null=True, verbose_name="Descrição Detalhada")
+    status_imovel = models.CharField(max_length=50, choices=STATUS_IMOVEL_CHOICES, default='Disponível', verbose_name="Status do Imóvel")
+    data_cadastro = models.DateTimeField(auto_now_add=True, verbose_name="Data de Cadastro")
     
-    # Valores financeiros. Usamos DecimalField para evitar erros de arredondamento com dinheiro.
-    valor_aluguel = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor do Aluguel")
-    valor_venda = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, verbose_name="Valor de Venda")
-    condominio_valor = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Valor do Condomínio")
-    iptu_valor = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Valor do IPTU")
-
-    # Características físicas. Usamos PositiveIntegerField pois não podem ser negativos.
+    # Características Físicas
     area_util = models.PositiveIntegerField(verbose_name="Área Útil (m²)")
     area_total = models.PositiveIntegerField(blank=True, null=True, verbose_name="Área Total (m²)")
     andar = models.IntegerField(blank=True, null=True, verbose_name="Andar")
     numero_quartos = models.PositiveIntegerField(default=0, verbose_name="Nº de Quartos")
     numero_banheiros = models.PositiveIntegerField(default=1, verbose_name="Nº de Banheiros")
     vagas_garagem = models.PositiveIntegerField(default=0, verbose_name="Vagas de Garagem")
+
+    # NOVOS CAMPOS: Códigos e Condomínio
+    codigo_energia = models.CharField(max_length=100, blank=True, null=True, verbose_name="Código de Energia")
+    codigo_agua = models.CharField(max_length=100, blank=True, null=True, verbose_name="Código de Água")
+    administradora_condominio = models.CharField(max_length=255, blank=True, null=True, verbose_name="Administradora do Condomínio")
+    condominio_valor = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Valor do Condomínio")
+
+    # NOVOS CAMPOS: Dados de Aquisição e Venda
+    data_aquisicao = models.DateField(blank=True, null=True, verbose_name="Data de Aquisição do Imóvel")
+    data_venda = models.DateField(blank=True, null=True, verbose_name="Data da Venda")
+    valor_aquisicao = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, verbose_name="Valor de Aquisição")
+    imposto_venda = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, verbose_name="Imposto sobre a Venda")
+    valor_liquido_venda = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True, verbose_name="Valor Líquido da Venda")
     
-    status_imovel = models.CharField(max_length=50, choices=STATUS_IMOVEL_CHOICES, default='Disponível', verbose_name="Status do Imóvel")
-    tipo_garantia = models.CharField(max_length=50, choices=TIPO_GARANTIA_CHOICES, blank=True, null=True, verbose_name="Tipo de Garantia Exigida")
+    # Valores de Locação
+    valor_aluguel = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor do Aluguel")
+    valor_liquido_aluguel = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Valor Líquido do Aluguel")
+    iptu_valor = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Valor do IPTU")
     
-    # Datas e Arquivos
-    data_cadastro = models.DateTimeField(auto_now_add=True, verbose_name="Data de Cadastro")
-    data_ultimo_aluguel = models.DateField(blank=True, null=True, verbose_name="Data do Último Aluguel")
-    # Para Imagens e outros arquivos, o ideal é usar ImageField ou FileField.
-    # Isso requer configuração de MEDIA_ROOT e MEDIA_URL no settings.py.
-    # Usamos CharField como um placeholder inicial simples.
+    # NOVOS CAMPOS: Seguro do Imóvel
+    seguro_vencimento = models.DateField(blank=True, null=True, verbose_name="Vencimento do Seguro")
+    seguro_corretora = models.CharField(max_length=255, blank=True, null=True, verbose_name="Corretora do Seguro")
+    seguro_seguradora = models.CharField(max_length=255, blank=True, null=True, verbose_name="Seguradora")
+    seguro_valor = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True, verbose_name="Valor do Seguro")
+
+    # Campo de Imagens (placeholder)
     imagens = models.CharField(max_length=255, blank=True, null=True, help_text="Caminho ou URL para as imagens")
 
     class Meta:
         verbose_name = "Imóvel"
         verbose_name_plural = "Imóveis"
-        ordering = ['-data_cadastro'] # Ordena os imóveis do mais novo para o mais antigo
+        ordering = ['-data_cadastro']
 
     def __str__(self):
         return f"{self.tipo_imovel} - {self.endereco}"
@@ -157,7 +162,6 @@ class Contrato(models.Model):
     data_fim = models.DateField(verbose_name="Data de Fim")
     valor_aluguel = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor do Aluguel (Contratado)")
     valor_deposito = models.DecimalField(max_digits=10, decimal_places=2, default=0, verbose_name="Valor do Depósito/Caução")
-    tipo_garantia = models.CharField(max_length=50, choices=Imovel.TIPO_GARANTIA_CHOICES, verbose_name="Tipo de Garantia")
     status_contrato = models.CharField(max_length=20, choices=STATUS_CONTRATO_CHOICES, default='Ativo', verbose_name="Status do Contrato")
     data_assinatura = models.DateField(verbose_name="Data da Assinatura")
     data_vencimento_pagamento = models.PositiveIntegerField(verbose_name="Dia do Vencimento do Pagamento")

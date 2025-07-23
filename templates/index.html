@@ -127,21 +127,44 @@ document.addEventListener('DOMContentLoaded', function () {
                 { header: 'Aluguel', key: 'valor_aluguel', type: 'currency' },
             ],
             formFields: [
+                // Grupo: Dados Principais
                 { key: 'tipo_imovel', label: 'Tipo de Imóvel', type: 'select', required: true, options: [['Casa', 'Casa'], ['Apartamento', 'Apartamento'], ['Sala Comercial', 'Sala Comercial'], ['Terreno', 'Terreno'], ['Galpão', 'Galpão']]},
                 { key: 'status_imovel', label: 'Status', type: 'select', required: true, options: [['Disponível', 'Disponível'], ['Alugado', 'Alugado'], ['Vendido', 'Vendido'], ['Em Manutenção', 'Em Manutenção'], ['Inativo', 'Inativo']]},
                 { key: 'endereco', label: 'Endereço Completo', type: 'text', required: true },
                 { key: 'descricao', label: 'Descrição', type: 'textarea' },
-                { key: 'valor_aluguel', label: 'Valor do Aluguel', type: 'number', step: '0.01', required: true },
-                { key: 'valor_venda', label: 'Valor de Venda', type: 'number', step: '0.01' },
-                { key: 'condominio_valor', label: 'Valor do Condomínio', type: 'number', step: '0.01' },
-                { key: 'iptu_valor', label: 'Valor do IPTU', type: 'number', step: '0.01' },
+                
+                // Grupo: Características Físicas
                 { key: 'area_util', label: 'Área Útil (m²)', type: 'number', required: true },
                 { key: 'area_total', label: 'Área Total (m²)', type: 'number' },
                 { key: 'andar', label: 'Andar', type: 'number' },
                 { key: 'numero_quartos', label: 'Quartos', type: 'number' },
                 { key: 'numero_banheiros', label: 'Banheiros', type: 'number' },
                 { key: 'vagas_garagem', label: 'Vagas de Garagem', type: 'number' },
-                { key: 'tipo_garantia', label: 'Tipo de Garantia', type: 'select', options: [['Caução', 'Caução'], ['Fiador', 'Fiador'], ['Seguro Fiança', 'Seguro Fiança'], ['Título de Capitalização', 'Título de Capitalização'], ['Sem Garantia', 'Sem Garantia']]},
+
+                // Grupo: Códigos e Condomínio
+                { key: 'codigo_energia', label: 'Código de Energia', type: 'text' },
+                { key: 'codigo_agua', label: 'Código de Água', type: 'text' },
+                { key: 'administradora_condominio', label: 'Administradora do Condomínio', type: 'text' },
+                { key: 'condominio_valor', label: 'Valor do Condomínio', type: 'number', step: '0.01' },
+                
+                // Grupo: Dados de Aquisição e Venda
+                { key: 'data_aquisicao', label: 'Data de Aquisição', type: 'date' },
+                { key: 'valor_aquisicao', label: 'Valor de Aquisição', type: 'number', step: '0.01' },
+                { key: 'data_venda', label: 'Data da Venda', type: 'date' },
+                { key: 'imposto_venda', label: 'Imposto sobre Venda', type: 'number', step: '0.01' },
+                { key: 'valor_liquido_venda', label: 'Valor Líquido da Venda', type: 'number', step: '0.01' },
+                
+                // Grupo: Dados de Locação
+                { key: 'valor_aluguel', label: 'Valor do Aluguel', type: 'number', step: '0.01', required: true },
+                { key: 'valor_liquido_aluguel', label: 'Valor Líquido do Aluguel', type: 'number', step: '0.01' },
+                { key: 'iptu_valor', label: 'Valor do IPTU', type: 'number', step: '0.01' },
+
+                // Grupo: Seguro do Imóvel
+                { key: 'seguro_vencimento', label: 'Vencimento do Seguro', type: 'date' },
+                { key: 'seguro_corretora', label: 'Corretora do Seguro', type: 'text' },
+                { key: 'seguro_seguradora', label: 'Seguradora', type: 'text' },
+                { key: 'seguro_valor', label: 'Valor do Seguro', type: 'number', step: '0.01' },
+
                 { key: 'imagens', label: 'URL da Imagem', type: 'text' }
             ]
         },
@@ -201,7 +224,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 { key: 'valor_aluguel', label: 'Valor do Aluguel', type: 'number', step: '0.01', required: true },
                 { key: 'valor_deposito', label: 'Valor do Depósito (Caução)', type: 'number', step: '0.01' },
                 { key: 'multa_rescisoria', label: 'Multa Rescisória', type: 'number', step: '0.01', required: true },
-                { key: 'tipo_garantia', label: 'Tipo de Garantia', type: 'select', required: true, options: [['Caução', 'Caução'], ['Fiador', 'Fiador'], ['Seguro Fiança', 'Seguro Fiança'], ['Título de Capitalização', 'Título de Capitalização'], ['Sem Garantia', 'Sem Garantia']]},
                 { key: 'status_contrato', label: 'Status do Contrato', type: 'select', required: true, options: [['Ativo', 'Ativo'], ['Encerrado', 'Encerrado'], ['Rescindido', 'Rescindido'], ['Renovado', 'Renovado']]},
                 { key: 'clausulas_especificas', label: 'Cláusulas Específicas', type: 'textarea' },
             ]
@@ -285,7 +307,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ui.overlay.classList.add('hidden');
     }
 
-    function openModal(title, bodyContent, footerContent = '') {
+    window.openModal = function(title, bodyContent, footerContent = '') {
         ui.modalTitle.textContent = title;
         ui.modalBody.innerHTML = bodyContent;
         ui.modalFooter.innerHTML = footerContent;
@@ -293,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ui.modal.classList.add('flex');
     }
     
-    function closeModal() {
+    window.closeModal = function() {
         ui.modal.classList.add('hidden');
         ui.modal.classList.remove('flex');
         ui.modalBody.innerHTML = '';
@@ -363,7 +385,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 </div>`;
             const footerContent = `
                 <button class="bg-red-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-red-700" onclick="handleDelete('${pageId}', ${itemId})">Deletar</button>
-                <button class="bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 ml-2" onclick="closeModal()">Fechar</button>
                 <button class="bg-orange-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-orange-600 ml-2" onclick="showForm('${pageId}', ${itemId})">Editar</button>`;
             openModal(`Detalhes de ${config.title} #${itemId}`, bodyContent, footerContent);
         } catch (error) {
